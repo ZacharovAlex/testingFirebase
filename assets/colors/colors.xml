@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#F6F6F6</color>
+    <color name="goldColor">#C0903F</color>
+    <color name="textLabel">#A0A0A0</color>
+    <color name="goodOperation">#12C055</color>
+    <color name="historyMinusOperation">#CD1F1F</color>
+    <color name="historyMinusOperationExchange">#FFA8A8</color>
+    <color name="errorNotificationBackground">#3F1300</color>
+    <color name="errorNotificationTextColor">#ED274B</color>
+    <color name="baseGrey">#A4A4A4</color>
+</resources>
