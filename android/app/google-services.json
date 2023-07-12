@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "139315620003",
+    "project_id": "processingpro-5daf6",
+    "storage_bucket": "processingpro-5daf6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:139315620003:android:33cb2b6b391372cbe47716",
+        "android_client_info": {
+          "package_name": "com.processing.crypto_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "139315620003-3v79u6rcrrohbkmpbkqk6sa6u3fg218e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.processing.crypto_app",
+            "certificate_hash": "c04b1e7b72eed5df141b2ca1fcf91b072c4d1948"
+          }
+        },
+        {
+          "client_id": "139315620003-dstsh51p8vm5p96impnn8hbkbo3aus6d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4dgV00Ym2L48-M74HuHIzrFxs0I0Kvco"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "139315620003-dstsh51p8vm5p96impnn8hbkbo3aus6d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "139315620003-l0p8jnuu23ibhkffrkg37vricb5gt0pl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.processing.cryptoApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
