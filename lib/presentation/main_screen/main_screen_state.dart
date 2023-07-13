@@ -14,6 +14,7 @@ class MainScreenState with _$MainScreenState {
     String? privat,
     String? telegram,
     @Default(false) errorSocket,
+    @Default(false) isReconnectTry,
      @Default(false) bool isEnabled,
    // @Default(BottomTab.home) BottomTab currentTab,
   }) = _MainScreenState;

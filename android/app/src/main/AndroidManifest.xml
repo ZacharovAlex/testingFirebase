@@ -46,10 +46,9 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>
-
         <!-- Add android:stopWithTask option only when necessary. -->
         <service
             android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
-            android:process=":remote" />
+            android:stopWithTask="true" />
     </application>
 </manifest>

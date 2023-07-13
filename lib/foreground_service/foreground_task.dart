@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'dart:isolate';
-import 'package:crypto_app/utils/file_logger.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:injectable/injectable.dart';
 import 'package:http/http.dart' as http;
 
 @injectable
 class MyTaskHandler extends TaskHandler {
- // final logger = FileOutput();
+  // final logger = FileOutput();
   SendPort? _sendPort;
   int _eventCount = 1;
   int percent = 100;
@@ -145,16 +144,14 @@ class MyTaskHandler extends TaskHandler {
           "user_telegram_id": telegram ?? 'none',
           "user_agent": deviceName ?? 'no device id',
           "device_id": imei ?? 'no imei',
-          "app_version": '2.0.0',
+          "app_version": '2.1',//TODO app version
         }),
       );
-      //  error = '';
 
       if (response.statusCode == 200) {
         _goodChecksCount++;
         FlutterForegroundTask.updateService(
           notificationTitle: status,
-          // notificationText: 'Health check ($count / $goodChecksCount)',
           notificationText: 'Health check $percent%',
         );
         // await logger.write(
@@ -172,8 +169,6 @@ class MyTaskHandler extends TaskHandler {
       } else {
         FlutterForegroundTask.updateService(
           notificationTitle: status,
-          // notificationText: 'Health check $count -  $status! ${response.statusCode}',
-          // notificationText: 'Health check ($count / $goodChecksCount) ${response.statusCode}',
           notificationText: 'Health check $percent%',
         );
         // print('PING BAD ${response.statusCode}${response.body}');
@@ -191,9 +186,6 @@ class MyTaskHandler extends TaskHandler {
         notificationTitle: '$percent% Connection Error Processing Crypto',
         notificationText: 'Looks you have a problem with your internet',
       );
-    //  await logger.write(' Error PING $count healthCheck $e');
-      // error = 'Ошибка отправки данных';
-      //print("ping not done!");
     }
   }
 }

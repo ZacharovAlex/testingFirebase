@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:android_power_manager/android_power_manager.dart';
@@ -11,11 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:telephony/telephony.dart';
 import 'foreground_service/foreground_task.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
-// late final Box authBox;
-// const _authBox = 'authBox';
 
 @pragma('vm:entry-point')
 void startCallback() {
@@ -28,19 +23,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await batteryOptimizationAndPhoneRequest();
- // await configureHive();
-   configureDependencies();
+
+  configureDependencies();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
- // batteryOptimizationRequest();
   runApp(const AutomaticConfirmApp());
 }
-
-// Future<void> configureHive() async {
-//   await Hive.initFlutter();
-//   authBox = await Hive.openBox(_authBox);
-// }
 
 Future<void> batteryOptimizationAndPhoneRequest() async {
   final telephony = Telephony.instance;

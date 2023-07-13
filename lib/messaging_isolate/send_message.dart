@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:crypto_app/data/isar_entity/messages.dart';
 import 'package:crypto_app/data/isar_service.dart';
-import 'package:crypto_app/utils/file_logger.dart';
 import 'package:intl/intl.dart';
 import 'package:telephony/telephony.dart';
 import 'package:http/http.dart' as http;
@@ -13,26 +12,19 @@ backgrounMessageHandler(SmsMessage message) async {
   final startSessionTime = settings!.startSessionTime!;
   final telephony = Telephony.instance;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd hh:mm:ss");
-  // final startSessionTimeBox = await Hive.openBox('authBox');
-  // final startTime = startSessionTimeBox.get('timeStart');
-  // print('Start time : ${(startTime as DateTime).millisecondsSinceEpoch}');
   Future<void> sendMessage(SmsMessage message) async {
     List<SmsMessage> messagesInbox = await telephony.getInboxSms(
         columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.ID, SmsColumn.DATE],
         filter: SmsFilter.where(SmsColumn.DATE)
-            .greaterThanOrEqualTo(startSessionTime.millisecondsSinceEpoch.toString())
+            .greaterThanOrEqualTo(startSessionTime.millisecondsSinceEpoch.toString()));
 
-        // sortOrder: [OrderBy(SmsColumn.ADDRESS, sort: Sort.ASC),
-        //   OrderBy(SmsColumn.BODY)]
-        );
-    // startSessionTimeBox.close();
     for (var message in messagesInbox) {
       var messageDate = DateTime.fromMillisecondsSinceEpoch(message.date ?? 0);
       var formatted = dateFormat.format(messageDate).toString();
-      print(' id = ${message.id} body :${message.body} time ${message.date} sentdate ${message.dateSent}');
+    //  print(' id = ${message.id} body :${message.body} time ${message.date} sentdate ${message.dateSent}');
       final isMessageExist = await service.ifMessageExist(message.date!);
       if (!isMessageExist) {
-        print('etogo sms netu!! dobavliau! ${message.body}');
+       // print('etogo sms netu!! dobavliau! ${message.body}');
         Messages newMessage = Messages()
           ..body = message.body
           ..timestamp = message.date
@@ -63,7 +55,6 @@ backgrounMessageHandler(SmsMessage message) async {
 
     for (var sendingMessage in messageToSend) {
       try {
-        // print('Start sending message');
         // await logger.write(
         //     'Start sending SMS with body ${message.body} to $_urlHook, publicApi $_publicApi, privateApi $_privateApi, telegram $_telegram');
         final response = await http.post(
@@ -80,15 +71,15 @@ backgrounMessageHandler(SmsMessage message) async {
             "user_telegram_id": _telegram ?? 'no telegram',
             "user_agent": credentials?.deviceId ?? 'no device id',
             "device_id": credentials?.imei ?? 'no imei',
-            "app_version": '2.0.0',
+            "app_version": '2.1', //TODO app version
             "timestamp": sendingMessage.timestamp.toString()
           }),
         );
-        print('body: ${response.body}');
+        //  print('body: ${response.body}');
         final result = jsonDecode(response.body) as Map<String, dynamic>;
-        print('result: $result');
+        //  print('result: $result');
         if (result['status'] != null) {
-          print('status ne nuuuullll!!!');
+          // print('status ne nuuuullll!!!');
           await service.updateMessageStatus(sendingMessage.id, true);
           await service.updateMessageStatusCode(sendingMessage.id, response.statusCode.toString());
 
