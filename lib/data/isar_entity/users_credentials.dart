@@ -5,8 +5,9 @@ part 'users_credentials.g.dart';
 @Collection()
 class UserCredentials {
   Id id = 1;//Isar.autoIncrement;
-  String? token;
+  String? fcmToken;
   String? imei;
   String? deviceId;
+  String? fcmMessage;
 
 }

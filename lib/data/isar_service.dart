@@ -4,6 +4,7 @@ import 'package:crypto_app/data/isar_entity/users_credentials.dart';
 import 'package:device_imei/device_imei.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:device_information/device_information.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -57,6 +58,7 @@ class IsarService {
     //  isar.writeTxnSync<int>(() isar.messages.putSync(message);
     isar.writeTxnSync(() => isar.messages.putSync(message));
   }
+
   Future<List<Messages>> getAllMessages() async {
     final isar = await db;
     return await isar.messages.where().findAll();
@@ -173,23 +175,36 @@ class IsarService {
       final initialCredentials = UserCredentials()
         ..imei = await getImei()
         ..deviceId = await getDeviceName()
-        ..token = '12345';
-      // final initialSettings = UserSettings()
-      //   ..telegram = 'no telegram'
-      //   ..publicApi = 'no publicApi'
-      //   ..privateApi = 'no privatApi'
-      //   ..url = 'no url'
-      //   ..token = '1234343'
-      //   ..imei = await getImei()
-      //   ..deviceId = await getDeviceName();
+        ..fcmToken = await getFcmToken() ?? 'no fcmToken';
 
-      //  await isar.userSettings.get(1);
-
-      // isar.writeTxnSync(() => isar.userSettings.putSync(initialSettings));
       isar.writeTxnSync(() => isar.userCredentials.putSync(initialCredentials));
       print('finish put credentials');
     }
   }
+
+  Future<String?> getFcmToken() async {
+    return await FirebaseMessaging.instance.getToken();
+  }
+
+  Future<void> updateFcmToken(String fcmToken) async {
+    final isar = await db;
+    final message = await isar.userCredentials.get(1);
+
+    message!.fcmToken = fcmToken;
+    isar.writeTxnSync<int>(() => isar.userCredentials.putSync(message));
+  }
+
+//TEST
+  Future<void> updateMessage(String push) async {
+    final isar = await db;
+    final message = await isar.userCredentials.get(1);
+
+    message!.fcmMessage = push;
+    isar.writeTxnSync<int>(() => isar.userCredentials.putSync(message));
+  }
+
+//TEST
+  // FirebaseMessaging.instance.getToken().then(updateFcmToken);
 
   Future<Isar> openDB() async {
     final dir = await getApplicationDocumentsDirectory();

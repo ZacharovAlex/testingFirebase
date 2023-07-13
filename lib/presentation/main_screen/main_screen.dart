@@ -8,6 +8,7 @@ import 'package:crypto_app/data/websocket_response/response.dart';
 import 'package:crypto_app/di/injectable.dart';
 import 'package:crypto_app/main.dart';
 import 'package:crypto_app/messaging_isolate/send_message.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -408,9 +409,66 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
   void initState() {
     // TODO: implement initState
     super.initState();
+    FirebaseMessaging.instance.getInitialMessage().then((message) async {
+      print('background message');
+    //  if (message != null) {
+        print('background message');
+        // message.data["msgType"] == "transaction"
+        //     ? {
+        //   //  InAppNotification.dismiss(context: context);
+        //   Navigator.push(
+        //       context,
+        //       CupertinoPageRoute(
+        //           builder: (_) => TransactionScreen(
+        //             transactionDetails: TransactionDetails.fromJson(message.data),
+        //           )))
+        // }
+        //    : null;
 
-    // logger.write('App Initiate!');
-    // initPlatformState();
+
+
+        // Navigator.push(
+        //     context,
+        //     CupertinoPageRoute(
+        //         builder: (_) => TransactionStatus(
+        //               status: message.data['transactionStatus'],
+        //               number: message.data['transactionNumber'],
+        //             )));
+        // await InAppNotification.show(
+        //   child: getOperationNotification(context, message),
+        //   context: context,
+        //   duration: Duration(milliseconds: 4000),
+        // );
+     // }
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      print('background oNmessage ');
+      // message.data["msgType"] == "transaction"
+      //     ? {
+      //   //  InAppNotification.dismiss(context: context);
+      //   Navigator.push(
+      //       context,
+      //       CupertinoPageRoute(
+      //           builder: (_) => TransactionScreen(
+      //             transactionDetails: TransactionDetails.fromJson(message.data),
+      //           )))
+      // }
+      //     : null;
+
+      //When app is background
+
+      // Navigator.push(
+      //     context,
+      //     CupertinoPageRoute(
+      //         builder: (_) => TransactionStatus(
+      //             status: message.data['transactionStatus'], number: message.data['transactionNumber'])));
+      // await InAppNotification.show(
+      //   child: getOperationNotification(context, message),
+      //   context: context,
+      //   duration: Duration(milliseconds: 3000),
+      // );
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _requestPermissionForAndroid();
       _initForegroundTask();
