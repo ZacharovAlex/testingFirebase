@@ -11,9 +11,7 @@ class MainScreenCubit extends BaseCubit<MainScreenState> {
  // final LocalStorage localStorage;
 final IsarService service;
 late StreamSubscription _subscriptionSettings;
-// late StreamSubscription _subscriptionPublic;
-// late StreamSubscription _subscriptionPrivat;
-// late StreamSubscription _subscriptionTelegram;
+late final StreamSubscription _fcmSubscription;
   MainScreenCubit(this.service,)
       : super(MainScreenState(
       )){
@@ -23,7 +21,15 @@ late StreamSubscription _subscriptionSettings;
       emit(state.copyWith(settings: event));
 
     });
+   // _fcmSubscription = FirebaseMessaging.instance.onTokenRefresh.listen(updateFcmToken);//TODO FCM token to Firebase
+  //  FirebaseMessaging.instance.getToken().then(updateFcmToken);
   }
+
+// Future<void> updateFcmToken(String? fcmToken) async {
+//   if (fcmToken != null) {
+//     _authRepository.updateFcmToken(fcmToken);
+//   }
+// }
 
   void enableListen() {
    // localStorage.setTimeStartSession(DateTime.now());
@@ -41,6 +47,10 @@ late StreamSubscription _subscriptionSettings;
   }
   void setError() async{
     emit(state.copyWith(errorSocket: true));
+  }
+
+  void reconnectTryToggle(bool isNowTry) async{
+    emit(state.copyWith(isReconnectTry: isNowTry));
   }
 
  // void stopListen()=>emit(state.copyWith(isEnabled:false));

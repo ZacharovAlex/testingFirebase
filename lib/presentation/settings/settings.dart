@@ -101,7 +101,7 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
               CustomTextField(formatter: [
-                FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
+              //  FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
               ], controller: _conttrtollerUserTelegram, title: telegram ?? 'no telegram Settings' //telegram,
                   ),
               Text('$telegram'),

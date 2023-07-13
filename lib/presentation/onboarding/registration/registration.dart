@@ -16,11 +16,9 @@ class OnBoarding extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-return BlocProvider(create: (_) => getIt.get<RegistrationCubit>(), child: _View());
+    return BlocProvider(create: (_) => getIt.get<RegistrationCubit>(), child: _View());
   }
 }
-
-
 
 class _View extends StatefulWidget {
   const _View({super.key});
@@ -50,24 +48,24 @@ class __View extends State<_View> {
     return BlocBuilder<RegistrationCubit, RegistrationState>(builder: (_, state) {
       final cubit = context.read<RegistrationCubit>();
       return BlocListener<RegistrationCubit, RegistrationState>(
-        listenWhen: (prev,curr) {
-          return prev.isRegister!=curr.isRegister;
+        listenWhen: (prev, curr) {
+          return prev.isRegister != curr.isRegister;
         },
-        listener:(prev, curr) {
+        listener: (prev, curr) {
           if (curr.isRegister) {
             Navigator.push(context, CupertinoPageRoute(builder: (_) => const HomeScreen()));
           }
         },
         child: Scaffold(
           body: Container(
-            decoration: BoxDecoration(gradient: LinearGradient(
-              // begin: Alignment.topLeft,
-              // end: Alignment.bottomRight,
-              colors: <Color>[
-                Colors.black54,
-                Colors.white12,
-              ],
-            ),),
+            // decoration: BoxDecoration(gradient: LinearGradient(
+            //   // begin: Alignment.topLeft,
+            //   // end: Alignment.bottomRight,
+            //   colors: <Color>[
+            //     Colors.black54,
+            //     Colors.white12,
+            //   ],
+            // ),),
             child: SafeArea(
               child: Column(
                 children: [
@@ -78,7 +76,10 @@ class __View extends State<_View> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Enter your data :',style: TextStyle(fontSize: 20),),
+                            const Text(
+                              'Enter your data :',
+                              style: TextStyle(fontSize: 20),
+                            ),
                             const SizedBox(
                               height: 20,
                             ),
@@ -91,8 +92,8 @@ class __View extends State<_View> {
                             CustomTextField(formatter: [
                               FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z:/.-]")),
                             ], controller: _conttrtollerUrl, title: 'Enter url' //url,
-                            ),
-                           // Text('URL'),
+                                ),
+                            // Text('URL'),
                             const SizedBox(
                               height: 10,
                             ),
@@ -102,14 +103,11 @@ class __View extends State<_View> {
                                 Text('Public Api :'),
                               ],
                             ),
-                            CustomTextField(
-                                formatter: [
-                                  FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
-                                ],
-                                controller: _conttrtollerPublicApi,
-                                title:'Enter public Api' //publicApi,
-                            ),
-                           // Text('${publicApi??'No public Api'}'),
+                            CustomTextField(formatter: [
+                              FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
+                            ], controller: _conttrtollerPublicApi, title: 'Enter public Api' //publicApi,
+                                ),
+                            // Text('${publicApi??'No public Api'}'),
                             const SizedBox(
                               height: 10,
                             ),
@@ -119,14 +117,11 @@ class __View extends State<_View> {
                                 Text('Private Api :'),
                               ],
                             ),
-                            CustomTextField(
-                                formatter: [
-                                  FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
-                                ],
-                                controller: _conttrtollerPrivateApi,
-                                title: 'Enter private Api' //privateApi,
-                            ),
-                           // Text('PrivateApi'),
+                            CustomTextField(formatter: [
+                              FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
+                            ], controller: _conttrtollerPrivateApi, title: 'Enter private Api' //privateApi,
+                                ),
+                            // Text('PrivateApi'),
                             const SizedBox(
                               height: 10,
                             ),
@@ -138,19 +133,18 @@ class __View extends State<_View> {
                             ),
                             CustomTextField(
                                 formatter: [
-                                  FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
-                                ],
-                                controller: _conttrtollerUserTelegram,
-                                title: 'Enter telegram' //telegram,
-                            ),
+                             // FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z]")),
+                            ],
+                                controller: _conttrtollerUserTelegram, title: 'Enter telegram' //telegram,
+                                ),
                             const SizedBox(
                               height: 15,
                             ),
-                           // Text('Telegram'),
+                            // Text('Telegram'),
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-                                onPressed:  () {
-                                 // print('URL = ${_conttrtollerUrl.text}');
+                                onPressed: () {
+                                  // print('URL = ${_conttrtollerUrl.text}');
                                   final newSettings = UserSettings()
                                     ..url = _conttrtollerUrl.text
                                     ..privateApi = _conttrtollerPrivateApi.text

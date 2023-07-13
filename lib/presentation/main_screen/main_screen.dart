@@ -8,7 +8,6 @@ import 'package:crypto_app/data/websocket_response/response.dart';
 import 'package:crypto_app/di/injectable.dart';
 import 'package:crypto_app/main.dart';
 import 'package:crypto_app/messaging_isolate/send_message.dart';
-import 'package:crypto_app/utils/file_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -42,6 +41,7 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
   final telephony = Telephony.instance;
   ReceivePort? _receivePort;
   final IsarService service = IsarService();
+
   //final settings =  service.getSettings();
 
 //   Future<void> sentMessagesTimer()async{
@@ -119,7 +119,6 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
 //     }
 //   }
 
-
   Future<void> sendMessage(SmsMessage message, DateTime startTimeSession) async {
     IsarService service = IsarService();
     //await Hive.initFlutter();
@@ -178,21 +177,21 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(<String, String>{
-          "user_api_public": _publicApi ?? 'none',
-          "user_api_private": _privateApi ?? "none",
-          "incoming_number": messageToSend.incoming_number ?? "empty",
-          'message_body': messageToSend.body ?? 'empty',
-          "received_time": messageToSend.date ?? 'No date', //message.date.toString(),
-          "user_telegram_id": _telegram ?? 'none',
-          "user_agent": credentials?.deviceId ?? 'No device name',
-          "device_id": credentials?.imei ?? 'No imei',
-          "app_version": '2.0.0',
-          "timestamp": messageToSend.timestamp.toString()
+            "user_api_public": _publicApi ?? 'none',
+            "user_api_private": _privateApi ?? "none",
+            "incoming_number": messageToSend.incoming_number ?? "empty",
+            'message_body': messageToSend.body ?? 'empty',
+            "received_time": messageToSend.date ?? 'No date', //message.date.toString(),
+            "user_telegram_id": _telegram ?? 'none',
+            "user_agent": credentials?.deviceId ?? 'No device name',
+            "device_id": credentials?.imei ?? 'No imei',
+            "app_version": '2.1', //TODO app version
+            "timestamp": messageToSend.timestamp.toString()
           }),
         );
-        print('body: ${response.body}');
+        // print('body: ${response.body}');
         final result = jsonDecode(response.body) as Map<String, dynamic>;
-        print('result: $result');
+        //  print('result: $result');
         if (result['status'] != null) {
           await service.updateMessageStatus(messageToSend.id, true);
           await service.updateMessageStatusCode(messageToSend.id, response.statusCode.toString());
@@ -221,10 +220,7 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
 
   onMessage(SmsMessage message) async {
     print('OnMessage!!!');
-    final settings = context
-        .read<MainScreenCubit>()
-        .state
-        .settings;
+    final settings = context.read<MainScreenCubit>().state.settings;
     if (settings == null) {
       return;
     }
@@ -273,7 +269,7 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
 
     // Android 13 and higher, you need to allow notification permission to expose foreground service notification.
     final NotificationPermission notificationPermissionStatus =
-    await FlutterForegroundTask.checkNotificationPermission();
+        await FlutterForegroundTask.checkNotificationPermission();
     if (notificationPermissionStatus != NotificationPermission.granted) {
       await FlutterForegroundTask.requestNotificationPermission();
     }
@@ -322,8 +318,8 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
     );
   }
 
-  Future<bool> _startForegroundTask(String url, String publicApi, String privateApi, String telegram,
-      String deviceId, String imei) async {
+  Future<bool> _startForegroundTask(
+      String url, String publicApi, String privateApi, String telegram, String deviceId, String imei) async {
     print('Foreground task  url  $url  public $publicApi  privat $privateApi telegram $telegram ');
     // You can save data using the saveData function.
     // await FlutterForegroundTask.saveData(key: 'customData', value: 'hello');
@@ -426,7 +422,6 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
       }
     });
 
-
     // Timer.periodic(const Duration(seconds: 10), (Timer timer) {
     //
     //   sentMessagesTimer();
@@ -438,7 +433,7 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       print('resume');
       connect();
-     // listenSocket();
+      // listenSocket();
     }
     if (state == AppLifecycleState.paused) {
       _channel?.sink.close();
@@ -456,84 +451,113 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
 
   void connect() {
     final cubit = context.read<MainScreenCubit>();
-    final credentials = cubit.state.credentials;
-    final settings = cubit.state.settings;
-    final imei = credentials?.imei;
-    final url = settings?.url;
+    final reconnectTry = cubit.state.isReconnectTry;
+    if (!reconnectTry) {
+      final credentials = cubit.state.credentials;
+      final settings = cubit.state.settings;
+      final imei = credentials?.imei;
+      final url = settings?.url;
 
-    if (url!=null&&url.length>8) {
-      final socketUrl = 'wss:${url.substring(6, url.length)}/ls/$imei';
-      print(' url  wss:${url.substring(6, url.length)}/ls/$imei');
-      try {
-        _channel = IOWebSocketChannel.connect(socketUrl,
-            headers: {'Connection': 'upgrade', 'Upgrade': 'Connection'});wss://fff2-83-69-220-238.ngrok-free.app/ls/671989760584311 wss://fff2-83-69-220-238.ngrok-free.app/ls/
-        listenSocket();
-      } catch (e) {
-        print(e);
-        cubit.setError();
+      if (url != null && url != '') {
+        final uri = Uri.parse(url);
+        var socketUrl =
+            Uri.parse(url).replace(scheme: uri.scheme == 'https' ? 'wss' : 'ws', path: '/ls/$imei');
+        // print(
+        //     ' uriiiii :  host: ${socketUrl.host} path: ${socketUrl.path} data: ${socketUrl.data} sheme: ${socketUrl.hasScheme} authority: ${socketUrl.authority} query: ${socketUrl.queryParametersAll} sheme: ${socketUrl.scheme}');
+        //  print('final url : $socketUrl ');
+        //  final socketUrl = 'wss:${url.substring(6, url.length)}/ls/$imei';
+        //  print(' url  wss:${url.substring(6, url.length)}/ls/$imei');
+        try {
+          _channel = IOWebSocketChannel.connect(
+            socketUrl,
+            headers: {'Connection': 'upgrade', 'Upgrade': 'Connection'},
+          );
+
+          listenSocket();
+        } catch (e) {
+          print(e);
+          cubit.setError();
+        }
       }
     }
-
-    //websocket
-    // _channel = WebSocketChannel.connect( // TODO on resume
-    //   Uri.parse(
-    //       'wss://fff2-83-69-220-238.ngrok-free.app/ls/$imei'),
-    // );
   }
 
   void listenSocket() {
-
     final settings = context.read<MainScreenCubit>().state.settings;
     final credentials = context.read<MainScreenCubit>().state.credentials;
+    final cubit = context.read<MainScreenCubit>();
+    final reconnectTry = cubit.state.isReconnectTry;
+
     final publicApi = settings?.publicApi;
     final privatApi = settings?.privateApi;
     final telegram = settings?.telegram;
     final deviceName = credentials?.deviceId;
     final imei = credentials?.imei;
+    if (!reconnectTry) {
+      _channel?.stream.listen(
+        (event) async {
+          print('EVENT : ${event}');
 
-    _channel?.stream.listen((event) async {
-      print('EVENT : ${event}');
+          final data = jsonDecode(event);
+          if (event != null && data['params'] != null) {
+            // print('DATA : $data');
+            final greaterTime = data['params']['left_time'];
+            final lessTime = data['params']['right_time'];
+            print('time : $greaterTime less $lessTime');
+            if (greaterTime != null) {
+              List<SmsMessage> messagesInbox = await telephony.getInboxSms(
+                  columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.ID, SmsColumn.DATE],
+                  // filter: SmsFilter.where(SmsColumn.DATE).greaterThanOrEqualTo(time));
+                  filter: SmsFilter.where(SmsColumn.DATE)
+                      .greaterThanOrEqualTo(greaterTime)
+                      .and(SmsColumn.DATE)
+                      .lessThanOrEqualTo(lessTime));
+              final messages =
+                  messagesInbox.map((e) => SmsMessages(e.address, e.body, e.date.toString())).toList();
+              print('kolvo sms : ${messages.length}');
+              final stock = Stock(publicApi ?? 'no public', privatApi ?? 'no privat');
+              final device = Device(imei ?? 'no imei', deviceName ?? 'no name');
+              final app = App('2.0');
+              final user = User(telegram ?? 'no telegram', stock, device, app);
+              final response = MyResponse(user, messages);
+              // print(jsonEncode(response));
+              // print('messages $messages kolvo ${messages.length}');
+              // print(
+              //     'stock $stock device $device user $user   public $publicApi  privat $privatApi imei $imei devicename $deviceName  ');
+              _channel?.sink.add(jsonEncode(response));
+            }
+          }
+        },
+        onDone: () {
+          if (cubit.state.isReconnectTry) {
+            return;
+          } else {
+            cubit.reconnectTryToggle(true);
+            reconnect();
+          }
+          print('ws channel closed');
+        },
+        onError: (error) {
+          if (cubit.state.isReconnectTry) {
+            return;
+          } else {
+            cubit.reconnectTryToggle(true);
+            reconnect();
+          }
+          print('ws ERROR!!! $error');
+        },
+      );
+    }
+  }
 
-      final data = jsonDecode(event);
-if (event!=null&&data['params']!=null) {
-        print('DATA : $data');
-        final greaterTime = data['params']['left_time'];
-        final lessTime = data['params']['right_time'];
-        print('time : $greaterTime less $lessTime');
-        if (greaterTime != null) {
-          List<SmsMessage> messagesInbox = await telephony.getInboxSms(
-              columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.ID, SmsColumn.DATE],
-              // filter: SmsFilter.where(SmsColumn.DATE).greaterThanOrEqualTo(time));
-              filter: SmsFilter.where(SmsColumn.DATE).greaterThanOrEqualTo(greaterTime).and(SmsColumn.DATE).lessThanOrEqualTo(lessTime));
-          final messages =
-              messagesInbox.map((e) => SmsMessages(e.address, e.body, e.date.toString())).toList();
-          final stock = Stock(publicApi ?? 'no public', privatApi ?? 'no privat');
-          final device = Device(imei ?? 'no imei', deviceName ?? 'no name');
-          final app = App('2.0.0');
-          final user = User(telegram ?? 'no telegram', stock, device, app);
-          final response = MyResponse(user, messages);
-          print(jsonEncode(response));
-          print('messages $messages kolvo ${messages.length}');
-          print(
-              'stock $stock device $device user $user   public $publicApi  privat $privatApi imei $imei devicename $deviceName  ');
-          _channel?.sink.add(jsonEncode(response));
-        }
-      }
-
-      // List<SmsMessage> messagesInbox = await telephony.getInboxSms(
-      //     columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.ID, SmsColumn.DATE],
-      //     );
-      // final messages = messagesInbox.map((e) => SmsMessages(e.address, e.body, e.date.toString())).toList();
-      // final stock = Stock(publicApi ?? 'no public', privatApi ?? 'no privat');
-      // final device = Device(imei ?? 'no imei', deviceName ?? 'no name');
-      // final app = App('2.0.0');
-      // final user = User(telegram ?? 'no telegram', stock, device, app);
-      // final response = MyResponse(user, messages);
-      // print('stock $stock device $device user $user   public $publicApi  privat $privatApi imei $imei devicename $deviceName  ');
-      // _channel?.sink.add(jsonEncode(response));
-
-
-    });
+  void reconnect() async {
+    if (_channel!.stream.isBroadcast == false) {
+      Timer(Duration(seconds: 5), () {
+        print("Yeah, this line is printed after 5 seconds");
+        context.read<MainScreenCubit>().reconnectTryToggle(false);
+        connect();
+      });
+    }
   }
 
   @override
@@ -544,110 +568,120 @@ if (event!=null&&data['params']!=null) {
       final credentials = state.credentials;
       return (settings != null && credentials != null)
           ? Container(
-        child: Center(
-          child: state.isEnabled
-              ? Container(
-            color:Colors.green,
-            child: Center(child: Text('Working',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.white),),),
-            //mainAxisAlignment: MainAxisAlignment.center,
-            //     children: [
-            //       const Text('Now working...listen sms...'),
-            //       state.errorSocket? Text('But socket not work'):SizedBox(),
-            //
-            //     ],
-              )
-              : ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  backgroundColor: Colors.green),
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(20))),
-                        title: Text("Start service with this parameters? ",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 18), textAlign: TextAlign.center,),
-                        content: Container(
-                         // height: 230,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-
-                                  Text("Url: ", style: TextStyle(fontSize: 16,fontWeight: FontWeight.w700),),
-                                  Text("${settings.url}", style: TextStyle(fontSize: 13)),
-                              SizedBox(height: 10,),
-
-
-
-                                  Text("PrivateApi: ", style: TextStyle(fontSize: 16,fontWeight: FontWeight.w700)),
-                                  Text("${settings.privateApi}", style: TextStyle(fontSize: 13)),
-                              SizedBox(height: 10,),
-
-                                  Text("PublicApi: ", style: TextStyle(fontSize: 16,fontWeight: FontWeight.w700)),
-                                  Text("${settings.publicApi}", style: TextStyle(fontSize: 13)),
-                              SizedBox(height: 10,),
-
-                                  Text("Telegram: ", style: TextStyle(fontSize: 16,fontWeight: FontWeight.w700)),
-                                  Text("${settings.telegram}", style: TextStyle(fontSize: 13),),
-
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(40),
-                                          ),
-                                          backgroundColor: Colors.green),
-                                      onPressed: () {
-                                        _startForegroundTask(
-                                          settings.url ?? 'No url',
-                                          settings.publicApi ?? 'No public Api',
-                                          settings.privateApi ?? 'No private Api',
-                                          settings.telegram ?? 'No telegram',
-                                          credentials.deviceId ?? 'No device id',
-                                          credentials.imei ?? 'No imei',
-
-                                        );
-                                        connect();
-                                        cubit.enableListen();
-                                        telephony.listenIncomingSms(
-                                            onNewMessage: onMessage, onBackgroundMessage: backgrounMessageHandler);
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Start')),
-                                  ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(40),
-                                          ),
-                                          backgroundColor: Colors.black),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('No')),
-                                ],
-                              )
-                            ],
+              child: Center(
+                child: state.isEnabled
+                    ? Container(
+                        color: Colors.green,
+                        child: Center(
+                          child: Text(
+                            'Working',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
                           ),
                         ),
-                      );
-                    });
-              },
-              child: Text('Start Work')),
-        ),
-      )
+                      )
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            backgroundColor: Colors.green),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                                  title: Text(
+                                    "Start service with this parameters? ",
+                                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  content: Container(
+                                    // height: 230,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Url: ",
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                        ),
+                                        Text("${settings.url}", style: TextStyle(fontSize: 13)),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text("PrivateApi: ",
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                        Text("${settings.privateApi}", style: TextStyle(fontSize: 13)),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text("PublicApi: ",
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                        Text("${settings.publicApi}", style: TextStyle(fontSize: 13)),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text("Telegram: ",
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                        Text(
+                                          "${settings.telegram}",
+                                          style: TextStyle(fontSize: 13),
+                                        ),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(40),
+                                                    ),
+                                                    backgroundColor: Colors.green),
+                                                onPressed: () {
+                                                  _startForegroundTask(
+                                                    settings.url ?? 'No url',
+                                                    settings.publicApi ?? 'No public Api',
+                                                    settings.privateApi ?? 'No private Api',
+                                                    settings.telegram ?? 'No telegram',
+                                                    credentials.deviceId ?? 'No device id',
+                                                    credentials.imei ?? 'No imei',
+                                                  );
+                                                  connect();
+                                                  cubit.enableListen();
+                                                  telephony.listenIncomingSms(
+                                                      onNewMessage: onMessage,
+                                                      onBackgroundMessage: backgrounMessageHandler);
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text('Start')),
+                                            ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(40),
+                                                    ),
+                                                    backgroundColor: Colors.black),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text('No')),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              });
+                        },
+                        child: Text('Start Work')),
+              ),
+            )
           : Center(
-        child: Text('No Settings'),
-      );
+              child: Text('No Settings'),
+            );
     });
   }
 }
