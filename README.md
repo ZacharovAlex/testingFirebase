@@ -1,4 +1,4 @@
-# crypto_app
+# test firebase
 
 A new Flutter project.
 
