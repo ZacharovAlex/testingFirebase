@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class FancyContainer extends StatefulWidget {
   const FancyContainer({
@@ -17,15 +18,20 @@ class FancyContainer extends StatefulWidget {
     this.padding,
     this.titleStyle,
     this.subtitleStyle,
+    //this.id,
+    this.reason,
+    this.status,
   }) : super(key: key);
 
   final double? width;
   final double height;
   final Color? color1;
   final Color? color2;
-  final String? date;
+  final DateTime? date;
+  final bool? status;
   final String? sender;
   final String? statusCode;
+  final String? reason;
   final Color? textColor;
   final String? subtitle;
   final Color? subtitleColor;
@@ -33,6 +39,7 @@ class FancyContainer extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final TextStyle? titleStyle;
   final TextStyle? subtitleStyle;
+ // final String? id;
 
   @override
   _FancyContainerState createState() => _FancyContainerState();
@@ -41,6 +48,9 @@ class FancyContainer extends StatefulWidget {
 class _FancyContainerState extends State<FancyContainer> {
   @override
   Widget build(BuildContext context) {
+    final dateFormatterHour = DateFormat('yyyy-MM-dd HH:mm:ss', Localizations.localeOf(context).languageCode);
+
+    // print('MESSAGE : timestamp: ${widget.date} predate ${widget.preDate} body : ${widget.subtitle} hasconfirmed : ${widget.status}');
     return GestureDetector(
       onTap: widget.onTap ?? () {},
       child: Container(
@@ -48,10 +58,10 @@ class _FancyContainerState extends State<FancyContainer> {
         height: widget.height,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(20.0)),
-          gradient: LinearGradient(colors: [
-            widget.color1 ?? const Color(0xFFCB1841),
-            widget.color2 ?? const Color(0xFF2604DE)
-          ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+          gradient: LinearGradient(
+              colors: [widget.color1 ?? const Color(0xFFCB1841), widget.color2 ?? const Color(0xFF2604DE)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight),
           boxShadow: const [
             BoxShadow(
               color: Colors.grey,
@@ -61,7 +71,7 @@ class _FancyContainerState extends State<FancyContainer> {
           ],
         ),
         child: Column(
-         // mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
@@ -69,8 +79,28 @@ class _FancyContainerState extends State<FancyContainer> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // Text(
+                  //   'ID : ${widget.id.toString()}',
+                  //   style: widget.titleStyle ??
+                  //       TextStyle(
+                  //         color: widget.textColor,
+                  //         fontSize: 10.0,
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  // ),
+                  widget.date != null
+                      ? Text(
+                          'Time : ${dateFormatterHour.format(widget.date!)}',
+                          style: widget.titleStyle ??
+                              TextStyle(
+                                color: widget.textColor,
+                                fontSize: 10.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        )
+                      : const SizedBox(),
                   Text(
-                    widget.date??'no date',
+                    'Sender : ${widget.sender}',
                     style: widget.titleStyle ??
                         TextStyle(
                           color: widget.textColor,
@@ -78,33 +108,45 @@ class _FancyContainerState extends State<FancyContainer> {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  Text(
-                    widget.sender??'no sender',
-                    style: widget.titleStyle ??
-                        TextStyle(
-                          color: widget.textColor,
-                          fontSize: 10.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(widget.statusCode??'no statusCode'),
+                  // Text(widget.statusCode??'no statusCode'),
                 ],
               ),
             ),
             widget.subtitle != null
                 ? Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Text(
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-                widget.subtitle ?? "",
-                style: widget.subtitleStyle ??
-                    TextStyle(
-                      color: widget.subtitleColor,
-                      fontSize: 13.0,
+                    padding: const EdgeInsets.all(5.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                          widget.subtitle ?? "",
+                          style: widget.subtitleStyle ??
+                              TextStyle(
+                                color: widget.subtitleColor,
+                                fontSize: 13.0,
+                              ),
+                        ),
+                        const Divider(
+                          indent: 10.0,
+                          endIndent: 10.0,
+                          thickness: 2,
+                        ),
+                        Text(
+                          textAlign: TextAlign.start,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          'Reason: ${widget.reason ?? 'No reason'}',
+                          style: widget.subtitleStyle ??
+                              TextStyle(
+                                color: widget.subtitleColor,
+                                fontSize: 13.0,
+                              ),
+                        ),
+                      ],
                     ),
-              ),
-            )
+                  )
                 : Container(),
           ],
         ),

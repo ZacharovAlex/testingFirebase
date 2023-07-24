@@ -19,7 +19,7 @@ class RegistrationCubit extends BaseCubit<RegistrationState> {
   //   //storage.initial();
   //   emit(state.copyWith(isRegister: true));
   // }
-  void setSettings(UserSettings newSettings) async{
+  Future<void> setSettings(UserSettings newSettings) async{
     await _service.updateSettings(newSettings);
     emit(state.copyWith(isRegister: true));
   }

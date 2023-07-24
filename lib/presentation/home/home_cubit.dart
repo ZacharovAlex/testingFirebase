@@ -26,4 +26,4 @@ class HomeCubit extends BaseCubit<HomeState> {
   void moveTo(BottomTab tab) => emit(state.copyWith(currentTab: tab));
 }
 
-enum BottomTab { home,settings }//TODO if listen sms add "listenSms",
+enum BottomTab { home,listenSms,settings }//TODO if listen sms add "listenSms",

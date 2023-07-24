@@ -13,12 +13,7 @@ import 'main_state.dart';
 
 @injectable
 class MainCubit extends Cubit<MainState> {
-//  late final StreamSubscription _isLoggedSubscription;
   final IsarService service;
-  // late StreamSubscription _subscriptionUrl;
-  // late StreamSubscription _subscriptionPublicApi;
-  // late StreamSubscription _subscriptionPrivateApi;
-  // late StreamSubscription _subscriptionTelegram;
 
   MainCubit(Repository repository, this.service) : super(MainState()) {
     isSettingsExist();
@@ -27,11 +22,11 @@ class MainCubit extends Cubit<MainState> {
   }
   Future<void> isSettingsExist()async{
    if (await service.getSettings()==null){
-     print('MAIN SETTINGS ==NULL!!');
+    // print('MAIN SETTINGS ==NULL!!');
      emit(state.copyWith(isSettingExist: null
      ));
    }else{
-     print('MAIN SETTINGS NE NULL!!');
+    // print('MAIN SETTINGS NE NULL!!');
      emit(state.copyWith(isSettingExist: true
      ));
    }

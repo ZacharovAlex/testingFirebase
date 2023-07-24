@@ -64,6 +64,12 @@ dependencies:
   device_information: ^0.0.4
   web_socket_channel: ^2.4.0
   firebase_messaging: ^14.6.4
+  flutter_local_notifications: ^15.1.0+1
+  calendar_date_picker2: ^0.5.2
+  mobile_scanner:
+    git:
+      url: https://github.com/romawizard/mobile_scanner.git
+
 
 dev_dependencies:
   flutter_test:

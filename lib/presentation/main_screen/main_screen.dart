@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:isolate';
-import 'dart:io';
+import 'dart:ui';
 import 'package:crypto_app/data/isar_entity/messages.dart';
 import 'package:crypto_app/data/isar_service.dart';
+import 'package:crypto_app/data/response/sms_response.dart';
 import 'package:crypto_app/data/websocket_response/response.dart';
 import 'package:crypto_app/di/injectable.dart';
 import 'package:crypto_app/main.dart';
 import 'package:crypto_app/messaging_isolate/send_message.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -40,92 +43,92 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
   WebSocketChannel? _channel;
   final telephony = Telephony.instance;
   ReceivePort? _receivePort;
-  final IsarService service = IsarService();
+  final IsarService service = IsarService(); /// Разобрать!
 
-  //final settings =  service.getSettings();
-
-//   Future<void> sentMessagesTimer()async{
-//     final telephony = Telephony.instance;
-//     IsarService service = IsarService();
-//     List<SmsMessage> messagesInbox = await telephony.getInboxSms(
-//         columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.ID, SmsColumn.DATE],
-//         filter: SmsFilter.where(SmsColumn.DATE)
-//             .greaterThanOrEqualTo(DateTime.now().subtract(const Duration(minutes: 10)).toString()));
-//     print('data ${DateTime.now().minute} minus 10 minutes ${DateTime.now().subtract(const Duration(minutes: 10)).minute.toString()}');
-// print('kolvo ${messagesInbox}');
-//     final settings = await service.getSettings();
-//     final credentials = await service.getCredentials();
-//     final _urlHook = settings!.url ?? 'no Url';
-//     final _publicApi = settings.publicApi;
-//     final _privateApi = settings.privateApi;
-//     final _telegram = settings.telegram;
-//     //  final messageToSend = await service.getAllMessagesToSend();
-//
-//     for (var messageToSend in messagesInbox) {
-//       print('start sent');
-//       DateFormat dateFormat = DateFormat("yyyy-MM-dd hh:mm:ss");
-//       var messageDate = DateTime.fromMillisecondsSinceEpoch(messageToSend.date ?? 0);
-//       var formatted = dateFormat.format(messageDate).toString();
-//       try {
-//         // print('Start sending message ID  $id');
-//         // await logger.write(//user_agent: $_deviceName, device_id: $_deviceImei
-//         //     'Start sending sms with body ${message.body}  to $_urlHook/sms, user_api_private: $_privateApi, user_api_public: $_publicApi, user_telegram_id: $_telegram, incoming_number: ${message.address}, ');
-//         var response = await http.post(
-//           Uri.parse('$_urlHook/sms'),
-//           // Uri.parse('https://webhook.site/23276e50-da4d-4fcf-8823-f79eafbf9112/'),
-//           //https://webhook.site/a2759151-b152-40bb-b7ad-1f42b59961f3
-//           headers: <String, String>{
-//             'Content-Type': 'application/json; charset=UTF-8',
-//           },
-//           body: jsonEncode(<String, String>{
-//             "user_api_public": _publicApi ?? 'none',
-//             "user_api_private": _privateApi ?? "none",
-//             "incoming_number": messageToSend.address ?? "empty",
-//             'message_body': messageToSend.body ?? 'empty',
-//             "received_time": formatted, //message.date.toString(),
-//             "user_telegram_id": _telegram ?? 'none',
-//             "user_agent": credentials?.deviceId ?? 'No device name',
-//             "device_id": credentials?.imei ?? 'No imei',
-//             "app_version": '2.0.0',
-//             "timestamp": messageToSend.date.toString()
-//           }),
-//         );
-//         print('body: ${response.body}');
-//         final result = jsonDecode(response.body) as Map<String, dynamic>;
-//         print('result: $result');
-//         if (result['status'] != null) {
-//           // await service.updateMessageStatus(messageToSend.id, true);
-//           //  await service.updateMessageStatusCode(messageToSend.id, response.statusCode.toString());
-//           // await logger.write(
-//           //     'Sending message with body ${message.body} SUCCESS! with statuscode ${response.statusCode} and reasonPhrase ${response.reasonPhrase}!');
-//         }
-//         // else{
-//         //   service.updateMessageStatusCode(messageToSend.id, response.statusCode.toString());
-//         // }
-//         // if (response.statusCode == 200) {
-//         //   service.updateMessage(messageToSend.id, true);
-//         //   await logger.write(
-//         //       'Sending message with body ${message.body} json : ${response.request} SUCCESS with statuscode ${response.statusCode} and reasonPhrase ${response.reasonPhrase}!');
-//         // } else {
-//         //   await logger.write(
-//         //       'Sending message with body ${message.body} json : ${response.request} FAILED with statuscode ${response.statusCode} and body ${response.body}, and reasonPhrase ${response.reasonPhrase}!');
-//         // }
-//       }catch (e) {
-//         // service.updateMessageStatusCode(messageToSend.id, 'Exception');
-//         // error = 'Ошибка отправки данных';
-//         // print('Error! $e');
-//         // await logger.write('Error sending SMS, Error - $e ');
-//       }
-//     }
-//   }
+  ///this for notofication from another app listen
+  // List<NotificationEvent> _log = [];
+  // bool started = false;
+  // bool _loading = false;
+  //
+  // ReceivePort port = ReceivePort();
+  //
+  //
+  // Future<void> initPlatformState() async {
+  //   NotificationsListener.initialize(callbackHandle: _callback);
+  //
+  //   // this can fix restart<debug> can't handle error
+  //   IsolateNameServer.removePortNameMapping("_listener_");
+  //   IsolateNameServer.registerPortWithName(port.sendPort, "_listener_");
+  //   port.listen((message) => onData(message));
+  //
+  //   // don't use the default receivePort
+  //   // NotificationsListener.receivePort.listen((evt) => onData(evt));
+  //
+  //   var isR = await NotificationsListener.isRunning;
+  //   print("""Service is ${isR!=null&&!isR ? "not " : ""}aleary running""");
+  //
+  //   // setState(() {
+  //   //   started = isR;
+  //   // });
+  // }
+  // // we must use static method, to handle in background
+  // static void _callback(NotificationEvent evt) {
+  //   print("send evt to ui: $evt");
+  //   final SendPort? send = IsolateNameServer.lookupPortByName("_listener_");
+  //   if (send == null) print("can't find the sender");
+  //   send?.send(evt);
+  // }
+  //
+  // void onData(NotificationEvent event) {
+  //   // setState(() {
+  //   //   _log.add(event);
+  //   // });
+  //
+  //   print(event.toString());
+  // }
+  //
+  // void startListening() async {
+  //   print("start listening");
+  //   // setState(() {
+  //   //   _loading = true;
+  //   // });
+  //   var hasPermission = await NotificationsListener.hasPermission;
+  //   if (hasPermission!=null&&!hasPermission) {
+  //     print("no permission, so open settings");
+  //     NotificationsListener.openPermissionSettings();
+  //     return;
+  //   }
+  //
+  //   var isR = await NotificationsListener.isRunning;
+  //
+  //   if (isR!=null&&!isR) {
+  //     await NotificationsListener.startService(
+  //         foreground: false,
+  //         title: "Listener pushes Running",
+  //         description: "listen for push notifications");
+  //   }
+  // }
+  //
+  // // void stopListening() async {
+  // //   print("stop listening");
+  // //
+  // //   setState(() {
+  // //     _loading = true;
+  // //   });
+  // //
+  // //   await NotificationsListener.stopService();
+  // //
+  // //   setState(() {
+  // //     started = false;
+  // //     _loading = false;
+  // //   });
+  // // }
+  /// end of listen pushes from another apps service
 
   Future<void> sendMessage(SmsMessage message, DateTime startTimeSession) async {
     IsarService service = IsarService();
     //await Hive.initFlutter();
     DateFormat dateFormat = DateFormat("yyyy-MM-dd hh:mm:ss");
-    // final startSessionTimeBox = await Hive.openBox('authBox');
-    // final startTime = startSessionTimeBox.get('timeStart');
-    //  print('Start time : ${(startTime as DateTime).millisecondsSinceEpoch}');
     List<SmsMessage> messagesInbox = await telephony.getInboxSms(
         columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.ID, SmsColumn.DATE],
         filter: SmsFilter.where(SmsColumn.DATE)
@@ -134,11 +137,13 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
 
     for (var message in messagesInbox) {
       var messageDate = DateTime.fromMillisecondsSinceEpoch(message.date ?? 0);
+      //var formatted = dateFormat.format(messageDate);
       var formatted = dateFormat.format(messageDate).toString();
-      print(' id = ${message.id} body :${message.body} time ${message.date} sentdate ${message.dateSent}');
+      // print(
+      //     ' id = ${message.id} body :${message.body} time ${message.date} utc: ${messageDate.toUtc().millisecondsSinceEpoch} sentdate ${message.dateSent}');
       final isMessageExist = await service.ifMessageExist(message.date!);
       if (!isMessageExist) {
-        print('etogo sms netu!! dobavliau! ${message.body}');
+      //  print('etogo sms netu!! dobavliau! ${message.body}');
         Messages newMessage = Messages()
           ..body = message.body
           ..timestamp = message.date
@@ -148,14 +153,7 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
         service.addMessages(newMessage);
       }
     }
-    // var messageDate = DateTime.fromMillisecondsSinceEpoch(message.date ?? 0);
-    // var formatted = dateFormat.format(messageDate).toString();
-    // Messages newMessage = Messages()
-    //   ..body = message.body
-    //   ..status = false
-    //   ..date = formatted
-    //   ..address = message.address;hjhj
-    // service.addMessages(newMessage);
+
     final settings = await service.getSettings();
     final credentials = await service.getCredentials();
     final _urlHook = settings!.url ?? 'no Url';
@@ -220,31 +218,19 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
 
   onMessage(SmsMessage message) async {
     print('OnMessage!!!');
+
     final settings = context.read<MainScreenCubit>().state.settings;
     if (settings == null) {
       return;
     }
-    // final IsarService service = IsarService();
-
-    // DateFormat dateFormat = DateFormat("yyyy-MM-dd hh:mm:ss");
-    // var messageDate = DateTime.fromMillisecondsSinceEpoch(message.date ?? 0);
-    // var formatted = dateFormat.format(messageDate).toString();
-    // Messages newMessage = Messages()
-    //   ..body = message.body
-    //   ..status = false
-    //   ..date = formatted
-    //   ..address = message.address;
-    // service.addMessages(newMessage);
-    // await logger.write(
-    //     'Surface receive SMS!  Time : ${message.date} address: ${message.address}, Body: ${message.body},Seen - ${message.seen.toString()}');
 
     sendMessage(message, settings.startSessionTime!);
   }
 
   Future<void> _requestPermissionForAndroid() async {
-    if (!Platform.isAndroid) {
-      return;
-    }
+    // if (!Platform.isAndroid) {
+    //   return;
+    // }
 
     // "android.permission.SYSTEM_ALERT_WINDOW" permission must be granted for
     // onNotificationPressed function to be called.
@@ -290,18 +276,18 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
           name: 'launcher',
           backgroundColor: Colors.orange,
         ),
-        buttons: [
-          const NotificationButton(
-            id: 'sendButton',
-            text: 'Send',
-            textColor: Colors.orange,
-          ),
-          const NotificationButton(
-            id: 'testButton',
-            text: 'Test',
-            textColor: Colors.grey,
-          ),
-        ],
+        // buttons: [
+        //   const NotificationButton(
+        //     id: 'sendButton',
+        //     text: 'Send',
+        //     textColor: Colors.orange,
+        //   ),
+        //   const NotificationButton(
+        //     id: 'testButton',
+        //     text: 'Test',
+        //     textColor: Colors.grey,
+        //   ),
+        // ],
       ),
       iosNotificationOptions: const IOSNotificationOptions(
         showNotification: true,
@@ -408,9 +394,75 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // FirebaseMessaging.onMessage.listen((RemoteMessage message){ ///Listten normal push
+    //   print('When surfeis');
+    // });
+    // FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails().then((value){ ///Listten normal push
+    //   if(value != null){
+    //     print('when terminated');
+    //     print('Message details = ${value.notificationResponse?.payload}');
+    //   }
+    // });
 
-    // logger.write('App Initiate!');
-    // initPlatformState();
+    // FirebaseMessaging.instance.getInitialMessage().then((message) async {
+    //   print('background 1 message');
+    // if (message != null) {
+    //   print('background message');
+    //    message.data["msgType"] == "transaction"
+    //        ? {
+    //      //  InAppNotification.dismiss(context: context);
+    //      Navigator.push(
+    //          context,
+    //          CupertinoPageRoute(
+    //              builder: (_) => TransactionScreen(
+    //                transactionDetails: TransactionDetails.fromJson(message.data),
+    //              )))
+    //    }
+    //       : null;
+
+    // Navigator.push(
+    //     context,
+    //     CupertinoPageRoute(
+    //         builder: (_) => TransactionStatus(
+    //               status: message.data['transactionStatus'],
+    //               number: message.data['transactionNumber'],
+    //             )));
+    // await InAppNotification.show(
+    //   child: getOperationNotification(context, message),
+    //   context: context,
+    //   duration: Duration(milliseconds: 4000),
+    // );
+    // }
+    //  });
+    //    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    //      print('background 2 oNmessage ');
+    // message.data["msgType"] == "transaction"
+    //     ? {
+    //   //  InAppNotification.dismiss(context: context);
+    //   Navigator.push(
+    //       context,
+    //       CupertinoPageRoute(
+    //           builder: (_) => TransactionScreen(
+    //             transactionDetails: TransactionDetails.fromJson(message.data),
+    //           )))
+    // }
+    //  : null;
+
+    //  When app is background
+
+    // Navigator.push(
+    //     context,
+    //     CupertinoPageRoute(
+    //         builder: (_) => TransactionStatus(
+    //             status: message.data['transactionStatus'], number: message.data['transactionNumber'])));
+    //
+    // await InAppNotification.show(
+    //   child: getOperationNotification(context, message),
+    //   context: context,
+    //   duration: Duration(milliseconds: 3000),
+    // );
+    // });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _requestPermissionForAndroid();
       _initForegroundTask();
@@ -513,7 +565,7 @@ class _ViewState extends State<_View> with WidgetsBindingObserver {
                       .and(SmsColumn.DATE)
                       .lessThanOrEqualTo(lessTime));
               final messages =
-                  messagesInbox.map((e) => SmsMessages(e.address, e.body, e.date.toString())).toList();
+                  messagesInbox.map((e) => SmsMessages(e.address??'no adress', e.body??'no body', e.date.toString(),null,null)).toList();
               print('kolvo sms : ${messages.length}');
               final stock = Stock(publicApi ?? 'no public', privatApi ?? 'no privat');
               final device = Device(imei ?? 'no imei', deviceName ?? 'no name');

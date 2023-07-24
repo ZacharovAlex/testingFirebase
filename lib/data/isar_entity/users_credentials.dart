@@ -8,5 +8,6 @@ class UserCredentials {
   String? token;
   String? imei;
   String? deviceId;
+  String? fcmToken;
 
 }

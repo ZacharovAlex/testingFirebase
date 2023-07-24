@@ -19,16 +19,16 @@ class IsarService {
   }
 
   Future<void> updateSettings(UserSettings newSettings) async {
+    print('Sttart NEW SETTINGS = ${newSettings.url}');
     final isar = await db;
     var oldSettings = await isar.userSettings.get(1);
     if (oldSettings == null) {
-      // print('OLDSETTINGS $oldSettings');
-      // await initial();
       isar.writeTxnSync(() => isar.userSettings.putSync(newSettings));
     }
     oldSettings = await isar.userSettings.get(1);
     if (oldSettings != null) {
       if (newSettings.url != '') {
+        print('NEW SETTINGS = ${newSettings.url}');
         oldSettings.url = newSettings.url;
       }
       if (newSettings.privateApi != '') {

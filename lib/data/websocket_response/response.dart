@@ -66,11 +66,15 @@ class App {
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class SmsMessages {
-  final String? incomingNumber;
-  final String? body;
-  final String? timestamp;
+  //final int? id;
+  final String incomingNumber;
+  final String body;
+  final String timeStamp;
+  final bool? hasConfirmed;
+  final String? reason;
+  DateTime get  formattedTimestamp => DateTime.fromMillisecondsSinceEpoch(int.parse(timeStamp??'0'));
 
-  SmsMessages(this.incomingNumber, this.body, this.timestamp);
+  SmsMessages(this.incomingNumber, this.body, this.timeStamp, this.hasConfirmed, this.reason);
 
   factory SmsMessages.fromJson(Map<String, dynamic> json) => _$SmsMessagesFromJson(json);
 

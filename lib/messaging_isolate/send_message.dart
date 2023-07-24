@@ -21,7 +21,8 @@ backgrounMessageHandler(SmsMessage message) async {
     for (var message in messagesInbox) {
       var messageDate = DateTime.fromMillisecondsSinceEpoch(message.date ?? 0);
       var formatted = dateFormat.format(messageDate).toString();
-    //  print(' id = ${message.id} body :${message.body} time ${message.date} sentdate ${message.dateSent}');
+    //  print(' id = ${message.id} body :${message.body} time ${message.date} utc: ${messageDate.toUtc().millisecondsSinceEpoch} sentdate ${message.dateSent}');
+
       final isMessageExist = await service.ifMessageExist(message.date!);
       if (!isMessageExist) {
        // print('etogo sms netu!! dobavliau! ${message.body}');
@@ -51,6 +52,7 @@ backgrounMessageHandler(SmsMessage message) async {
     final _publicApi = settings.publicApi;
     final _privateApi = settings.privateApi;
     final _telegram = settings.telegram;
+    final _fcmToken = credentials?.fcmToken??'no token';
     final messageToSend = await service.getAllMessagesToSend();
 
     for (var sendingMessage in messageToSend) {
@@ -67,12 +69,13 @@ backgrounMessageHandler(SmsMessage message) async {
             "user_api_private": _privateApi ?? "no private",
             "incoming_number": sendingMessage.incoming_number ?? "empty address",
             'message_body': sendingMessage.body ?? 'empty sms',
-            "received_time": sendingMessage.date ?? 'no time', //message.date.toString(),
+            "received_time": sendingMessage.date ?? 'no time',
             "user_telegram_id": _telegram ?? 'no telegram',
             "user_agent": credentials?.deviceId ?? 'no device id',
             "device_id": credentials?.imei ?? 'no imei',
             "app_version": '2.1', //TODO app version
-            "timestamp": sendingMessage.timestamp.toString()
+            "timestamp": sendingMessage.timestamp.toString(),
+            "fcmToken": _fcmToken
           }),
         );
         //  print('body: ${response.body}');

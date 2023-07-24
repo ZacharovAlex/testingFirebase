@@ -11,8 +11,8 @@ AppError parseError(Object error) {
     return error;
   }
   if (error is DioException &&
-      error.type == DioExceptionType.unknown &&
-      error.message!.contains('SocketException')) {
+      error.type == DioExceptionType.unknown
+      ) {
     print('DIO ERROR');
     return const NetworkConnectionError();
   }
@@ -22,8 +22,8 @@ AppError parseError(Object error) {
     return const ServerNotReachableError();
   }
 
-  if (error is DioException && (error.response?.data["description"] != null)) {
-    print('DIO ERROR TUT! ${error.response?.data["description"]}');
+  if (error is DioException && (error.response?.statusCode != null)) {
+    print('DIO ERROR TUT! ${error.response?.statusCode}');
     return DefaultError(); // TODO here implement and uncomment next code by errorcode
       // getErrorByErrorCode(error.response?.data[
       //   "errorCode"]); //ApiError(errorCode: error.response?.data["errorCode"],code: error.response?.statusCode, description: error.response?.data["description"]);

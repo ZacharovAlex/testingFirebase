@@ -1,21 +1,24 @@
 // import 'dart:io';
 //
+// import 'package:crypto_app/data/autoconfirm_api.dart';
+// import 'package:crypto_app/data/isar_service.dart';
 // import 'package:dio/dio.dart';
 // import 'package:injectable/injectable.dart';
-// import 'package:sms_v2/data/autoconfirm_api.dart';
-// import 'package:sms_v2/data/call_interceptor.dart';
 // import '../../presentation/app/app_constants.dart';
 //
 // @module
 // abstract class RegisterModule {
+//   IsarService service = IsarService();
+//
 //   @lazySingleton
-//   Dio provideDio(CallInterceptor callInterceptor) {
+//   Future<Dio> provideDio() async{
+//     final settings = await service.getSettings();
 //     final dio = Dio(BaseOptions(
-//         baseUrl: AppConstants.baseUrl,
+//         baseUrl: settings?.url??'no url',//AppConstants.baseUrl,
 //         responseType: ResponseType.json,
 //         contentType: ContentType.json.toString()));
-//     dio.interceptors.add(callInterceptor);
-//     dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+//    // dio.interceptors.add(callInterceptor);
+//   //  dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
 //
 //     //  (dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
 //

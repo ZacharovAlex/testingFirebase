@@ -86,7 +86,7 @@ class _TabsState extends State<Tabs> {
     final index = context.select((HomeCubit cubit) => cubit.state.currentTab.index);
     return IndexedStack(
       index: index,
-      children: [MainScreen(), BlocProvider(create: (_) => getIt.get<SettingsCubit>(), child: Settings())],//TODO if listen sms add ListenSmsScreen(),
+      children: [MainScreen(),ListenSmsScreen(), BlocProvider(create: (_) => getIt.get<SettingsCubit>(), child: Settings())],//TODO if listen sms add ListenSmsScreen(),
     );
   }
 }

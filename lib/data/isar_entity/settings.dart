@@ -5,10 +5,10 @@ part 'settings.g.dart';
 @Collection()
 class UserSettings {
   Id id = 1;//Isar.autoIncrement;
-  late String? url;
-  late String? publicApi;
-  late String? privateApi;
-  late String? telegram;
+   String? url;
+   String? publicApi;
+   String? privateApi;
+   String? telegram;
    DateTime? startSessionTime;
 
  // late String? token;

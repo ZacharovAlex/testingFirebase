@@ -1,6 +1,7 @@
+// import 'package:crypto_app/data/response/base_response.dart';
+// import 'package:crypto_app/data/websocket_response/response.dart';
 // import 'package:dio/dio.dart';
 // import 'package:retrofit/http.dart';
-// import 'package:sms_v2/data/response/base_response.dart';
 //
 // part 'autoconfirm_api.g.dart';
 //
@@ -8,21 +9,21 @@
 // abstract class AutoConfirmApi {
 //   factory AutoConfirmApi(Dio dio) = _AutoConfirmApi;
 //
-//   @POST('/sms')
+//   @POST('/getSms')
 //   @FormUrlEncoded()
-//   Future<MyBaseResponse> sendSms(
+//   Future<MyBaseResponse<List<SmsMessages>>> getSms(
 //    // @Header("FingerPrint") String modelInfo,
-//     @Part() String smsText,
-//     @Part() String sender,
-//     @Part() String time,
+//     @Part() String phoneId,
+//     @Part() String offset,
+//     @Part() String limit,
 //   );
 //
-//   @POST('/registration')
-//   @FormUrlEncoded()
-//   Future<MyBaseResponse> registration(
-//       // @Header("FingerPrint") String modelInfo,
-//       @Part() String number,
-//       );
+//   // @POST('/registration')
+//   // @FormUrlEncoded()
+//   // Future<MyBaseResponse> registration(
+//   //     // @Header("FingerPrint") String modelInfo,
+//   //     @Part() String number,
+//   //     );
 //
 //   // @POST('/healthcheck')
 //   // @FormUrlEncoded()

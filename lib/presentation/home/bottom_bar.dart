@@ -27,21 +27,21 @@ class BottomBar extends StatelessWidget {
               },
             ),
           ),//TODO UNCOMMENT to show sms
-          // Expanded(
-          //   child: BottomBarItem(
-          //     icon: const Icon(Icons.mail,color: Colors.white,),
-          //     title: 'SMS',
-          //     selected: index == 1,
-          //     onTap: () {
-          //       onChanged(BottomTab.listenSms);
-          //     },
-          //   ),
-          // ),
+          Expanded(
+            child: BottomBarItem(
+              icon: const Icon(Icons.mail,color: Colors.white,),
+              title: 'SMS',
+              selected: index == 1,
+              onTap: () {
+                onChanged(BottomTab.listenSms);
+              },
+            ),
+          ),
           Expanded(
             child: BottomBarItem(
               icon: const Icon(Icons.settings,color: Colors.white,),
               title: 'Settings',
-              selected: index == 1, //TODO change! if listen sms
+              selected: index == 2, //TODO change! if listen sms
               onTap: () {
                 onChanged(BottomTab.settings);
               },
